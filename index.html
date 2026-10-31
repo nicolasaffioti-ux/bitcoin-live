@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SIGNAL 30</title>
+<style>
+:root{--bg:#0b0e13;--p:#121720;--l:#232b38;--t:#d9dee7;--m:#7f8a9a;--up:#2fd07f;--dn:#ff5d5d;--ac:#4aa3ff;--w:#f2b84b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 system-ui,-apple-system,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.n{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--l);flex-wrap:wrap}
+h1{font-size:17px;margin:0 auto 0 0;letter-spacing:.05em}h2{font-size:16px}
+.pill{font-size:11px;padding:2px 8px;border:1px solid var(--l);border-radius:99px;color:var(--m)}
+.ok{color:var(--up);border-color:var(--up)}.wr{color:var(--w);border-color:var(--w)}.er{color:var(--dn);border-color:var(--dn)}
+button,select,input{font:inherit;color:var(--t);background:var(--p);border:1px solid var(--l);border-radius:6px;padding:6px 10px}
+button{cursor:pointer}button.on{border-color:var(--ac);color:var(--ac)}
+#idx{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--l)}
+.ix{flex:0 0 auto;min-width:122px;background:var(--p);border-radius:6px;padding:6px 8px}
+.ix small{color:var(--m);display:block;font-size:11px}
+nav{display:flex;gap:6px;padding:8px 12px;overflow-x:auto}
+section{display:none;padding:0 12px 24px}section.on{display:block}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px;align-items:center}.bar input[type=search]{flex:1;min-width:140px}
+.sc{overflow-x:auto}table{width:100%;border-collapse:collapse}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--l);white-space:nowrap;vertical-align:top}
+th{font-size:11px;color:var(--m);font-weight:500;cursor:pointer;user-select:none}
+tr.r{cursor:pointer}tr.r:hover{background:var(--p)}
+.u{color:var(--up)}.d{color:var(--dn)}.mu{color:var(--m)}
+.tag{font-size:10px;padding:1px 5px;border-radius:4px;border:1px solid var(--m);color:var(--m);margin-left:4px}
+.tag.l{border-color:var(--up);color:var(--up)}.tag.w{border-color:var(--w);color:var(--w)}
+.star{cursor:pointer;color:var(--m)}.star.on{color:var(--w)}
+.det{background:var(--p);padding:12px;white-space:normal}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.box{border:1px solid var(--l);border-radius:8px;padding:10px;background:var(--bg)}.box h3{margin:0 0 6px;font-size:13px}
+.f{display:flex;align-items:center;gap:6px;font-size:12px;margin:3px 0}.f span:first-child{width:130px}
+.f i{flex:1;height:6px;background:var(--l);border-radius:3px;overflow:hidden}.f b{display:block;height:100%;background:var(--ac)}
+canvas{width:100%;height:170px;display:block}
+.note{color:var(--m);font-size:12px;margin:6px 0 0;white-space:normal}
+.news{border-bottom:1px solid var(--l);padding:8px 0;white-space:normal}.news a,.note a{color:var(--ac)}
+.set label{display:block;margin:10px 0 4px;color:var(--m);font-size:12px}.set input,.set select{width:100%;max-width:420px}
+section p,section li{max-width:70ch}
+@media(max-width:640px){.hm{display:none}}
+</style></head><body>
+<header><h1>SIGNAL 30</h1><span id="mk" class="pill">Mercato USA</span><span id="st" class="pill wr">Non collegato</span><span id="lu" class="pill">mai aggiornato</span><button id="rf">Aggiorna</button></header>
+<div id="idx" aria-label="ETF di mercato"></div>
+<nav><button data-s="rk" class="on">Ranking</button><button data-s="nw">News</button><button data-s="me">Metodo</button><button data-s="se">Impostazioni</button></nav>
+
+<section id="rk" class="on">
+ <div id="setup" class="box" style="margin:6px 0 10px"><h3>Collega Finnhub per iniziare</h3><p class="note">Serve una chiave gratuita: registrati su <a href="https://finnhub.io/register" target="_blank" rel="noopener">finnhub.io/register</a>, copiala e incollala in Impostazioni. Senza chiave l'app non mostra dati, perché non usa dati dimostrativi.</p></div>
+ <div class="bar">
+  <input id="q" type="search" placeholder="Cerca ticker o società">
+  <select id="fs"><option value="">Tutti i settori</option></select>
+  <label class="pill"><input id="fw" type="checkbox"> Solo watchlist</label>
+ </div>
+ <div id="ex" class="note"></div>
+ <div class="sc"><table><thead><tr>
+  <th data-k="rk">#</th><th data-k="t">Titolo</th><th class="hm" data-k="sec">Settore</th><th data-k="p">Prezzo</th><th data-k="chg">Var. %</th><th data-k="sc">Punti</th><th data-k="mv">Pos.</th><th class="hm">Motivazione</th>
+ </tr></thead><tbody id="tb"></tbody></table></div>
+ <p class="note">Strumento informativo, non consulenza finanziaria. Nessun collegamento a broker, nessun ordine.</p>
+</section>
+
+<section id="nw">
+ <div class="bar"><select id="nc"><option value="general">Mercati: generali</option><option value="merger">Operazioni societarie</option><option value="forex">Valute</option></select><button id="nl">Carica notizie</button></div>
+ <div id="nb"><p class="note">Tocca Carica notizie per scaricarle: ogni caricamento usa 1 richiesta Finnhub.</p></div>
+</section>
+
+<section id="me">
+ <h2>Metodologia</h2>
+ <p>Il ranking usa solo ciò che Finnhub fornisce nel piano gratuito per i titoli USA: quotazione (prezzo, variazione, apertura, massimo, minimo, chiusura precedente) e notizie aziendali delle ultime 48 ore. Lo storico dei prezzi (candele) è a pagamento, quindi non ci sono RSI, medie mobili, ATR, volumi né supporti e resistenze calcolati su serie storiche.</p>
+ <p>Punteggio 0-100 = media pesata dei fattori disponibili: variazione giornaliera (20), forza nel range del giorno (15), andamento dall'apertura (10), trend multi-giorno (15), volatilità del giorno (10), attenzione sulle notizie (10), tono delle notizie (10), settore (5), mercato (5). Penalità di 10 punti se il range del giorno supera l'8% e di 10 se la variazione supera il 10%. I fattori senza dati sono esclusi e la copertura è indicata nella scheda.</p>
+ <p><b>Trend multi-giorno:</b> si costruisce da solo, salvando in questo browser l'ultimo prezzo di ogni giorno in cui apri l'app. Serve almeno 3 giorni di utilizzo prima che entri nel punteggio. <b>Tono delle notizie:</b> è un'euristica su parole chiave dei titoli (in inglese), non un'analisi del testo, e può sbagliare.</p>
+ <p><b>Limiti.</b> I dati si scaricano solo toccando Aggiorna e restano salvati nel browser fino all'aggiornamento successivo. Il piano gratuito ha un limite di richieste al minuto: le notizie si aggiornano a rotazione, 6 titoli per tocco. La freschezza dei prezzi non è garantita come real-time: ogni riga indica l'età dell'ultimo dato. Mancano fondamentali, risultati, macro e geopolitica. Un'operazione speculativa di pochi giorni può causare perdite anche totali. Scenari e livelli sono ipotesi, non previsioni.</p>
+</section>
+
+<section id="se" class="set">
+ <h2>Impostazioni</h2>
+ <label>Chiave API Finnhub</label><input id="sk" type="password" autocomplete="off" placeholder="Salvata solo in questo browser">
+ <p class="note">Usa una chiave gratuita: chi apre il file potrebbe vederla nel browser. Non è adatto a chiavi a pagamento.</p>
+ <p class="note">I dati si scaricano solo quando tocchi Aggiorna: ogni tocco usa circa 46 richieste Finnhub (36 titoli, 4 ETF e le notizie di 6 titoli). Aprire l'app non consuma nulla.</p>
+ <p><button id="ss" class="on">Salva e aggiorna</button> <button id="sw">Svuota watchlist</button> <button id="sr">Ripristina impostazioni</button></p>
+ <p id="sm" class="note"></p>
+</section>
+
+<script>
+/* ---- utilità ---- */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const LS=(k,v)=>{try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0,cl=x=>Math.max(0,Math.min(1,x));
+const f2=x=>x.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+const iso=d=>new Date(Date.now()+d*864e5).toISOString().slice(0,10);
+
+/* ---- universo: 36 titoli USA (nome e settore sono etichette fisse, i dati di mercato arrivano da Finnhub) ---- */
+const U=[['AAPL','Apple','Tecnologia'],['MSFT','Microsoft','Software'],['NVDA','NVIDIA','Semiconduttori'],['AMZN','Amazon','Consumi'],['GOOGL','Alphabet','Software'],['META','Meta','Software'],['TSLA','Tesla','Auto'],['AMD','AMD','Semiconduttori'],['AVGO','Broadcom','Semiconduttori'],['NFLX','Netflix','Consumi'],['PLTR','Palantir','Software'],['CRM','Salesforce','Software'],['ORCL','Oracle','Software'],['MU','Micron','Semiconduttori'],['QCOM','Qualcomm','Semiconduttori'],['UBER','Uber','Consumi'],['DIS','Disney','Consumi'],['WMT','Walmart','Consumi'],['COST','Costco','Consumi'],['JPM','JPMorgan','Banche'],['GS','Goldman Sachs','Banche'],['BAC','Bank of America','Banche'],['V','Visa','Finanza'],['MA','Mastercard','Finanza'],['COIN','Coinbase','Finanza'],['XOM','Exxon Mobil','Energia'],['CVX','Chevron','Energia'],['LLY','Eli Lilly','Salute'],['UNH','UnitedHealth','Salute'],['PFE','Pfizer','Salute'],['MRK','Merck','Salute'],['ABBV','AbbVie','Salute'],['BA','Boeing','Industria'],['CAT','Caterpillar','Industria'],['GE','GE Aerospace','Industria'],['NKE','Nike','Consumi']];
+const MX=[['SPY','S&P 500'],['QQQ','Nasdaq 100'],['DIA','Dow Jones'],['IWM','Russell 2000']].map(([t,n])=>({t,n,q:null}));
+const H=LS('hist')||{};
+const S=U.map(([t,n,sec])=>({t,n,sec,q:null,news:null,nts:0,snap:[],hist:H[t]=H[t]||{},rk:0,pr:null}));
+
+/* ---- stato ---- */
+const DEF={key:''};
+let LT=0,cfg=Object.assign({},DEF,LS('cfg')||{}),WL=LS('wl')||[],PREV=LS('rk')||{},sort={k:'rk',d:1},open=null,mode='snap',timer=null,lastErr='',busy=false;
+const POS=/\b(beats?|surges?|soars?|jumps?|upgrad\w*|record|raises?|rall\w+|approv\w+|wins?|buyback|strong)\b/i;
+const NEG=/\b(miss\w*|plunges?|drops?|falls?|downgrad\w*|lawsuit|probe|cuts?|recall|investigat\w+|fraud|weak|layoffs?|warns?|warning|slump\w*|sinks?)\b/i;
+
+/* ---- mercato USA aperto? (09:30-16:00 New York, lun-ven; i festivi non sono gestiti) ---- */
+function ny(){const p={};new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'short',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()).forEach(x=>p[x.type]=x.value);
+ const m=(+p.hour%24)*60+ +p.minute;return{open:!['Sat','Sun'].includes(p.weekday)&&m>=570&&m<960,hm:String(+p.hour%24).padStart(2,'0')+':'+p.minute}}
+
+/* ---- chiamate Finnhub ---- */
+async function api(p){const r=await fetch('https://finnhub.io/api/v1/'+p+(p.includes('?')?'&':'?')+'token='+encodeURIComponent(cfg.key));
+ if(r.status===401||r.status===403)throw{code:'key'};if(r.status===429)throw{code:'lim'};if(!r.ok)throw{code:'http'};return r.json()}
+async function pool(a,fn,n=6){let i=0;await Promise.all(Array.from({length:n},async()=>{while(i<a.length)await fn(a[i++])}))}
+
+async function refresh(){
+ if(busy)return;busy=true;lastErr='';
+ if(cfg.key&&!navigator.onLine)lastErr='Offline: ultimi dati disponibili';
+ else if(cfg.key){let key=0,lim=0,ok=0;
+  await pool([...S,...MX],async s=>{try{const q=await api('quote?symbol='+s.t);
+   if(q&&q.c>0&&q.t>0){s.q=q;ok++;if(s.snap)s.snap.push([Date.now(),q.c]);if(s.snap&&s.snap.length>300)s.snap.shift()}}catch(e){if(e.code==='key')key=1;if(e.code==='lim')lim=1}});
+  if(!key)await pool(S.slice().sort((a,b)=>a.nts-b.nts).slice(0,6),async s=>{try{
+   const d=await api('company-news?symbol='+s.t+'&from='+iso(-3)+'&to='+iso(0)),lo=Date.now()/1e3-172800;
+   s.news=d.filter(n=>n.datetime>lo).sort((a,b)=>b.datetime-a.datetime).slice(0,40).map(n=>({h:n.headline,src:n.source,dt:n.datetime,u:n.url}));s.nts=Date.now()}catch(e){if(e.code==='lim')lim=1}},3);
+  lastErr=key?'Chiave non valida o non autorizzata':!ok?(lim?'Limite di richieste raggiunto, riprovo al prossimo aggiornamento':'Nessun dato ricevuto da Finnhub'):lim?'Limite di richieste raggiunto: dati parziali':'';
+  if(ok)LT=Date.now();
+  S.forEach(s=>{if(!s.q)return;const day=new Date(s.q.t*1000).toISOString().slice(0,10);s.hist[day]=s.q.c;Object.keys(s.hist).sort().slice(0,-30).forEach(k=>delete s.hist[k])});LS('hist',H);LS('cache',{t:LT,q:Object.fromEntries(S.filter(s=>s.q).map(s=>[s.t,s.q])),n:Object.fromEntries(S.filter(s=>s.news).map(s=>[s.t,{news:s.news,nts:s.nts}])),mx:Object.fromEntries(MX.filter(m=>m.q).map(m=>[m.t,m.q]))})}
+ score();status();render();busy=false}
+
+/* ---- punteggio e ranking ---- */
+function score(){
+ const A=S.filter(s=>s.q);if(!A.length)return;
+ const mk=avg(A.map(s=>s.q.dp||0));
+ A.forEach(s=>{const q=s.q,tk=new Date(q.t*1000).toISOString().slice(0,10),pri=Object.keys(s.hist).sort().filter(k=>k<tk).slice(-5);
+  const rg=q.h>q.l?(q.c-q.l)/(q.h-q.l):null,rp=q.pc?(q.h-q.l)/q.pc*100:null,op=q.o?(q.c/q.o-1)*100:null,tr=pri.length>=2?(q.c/s.hist[pri[0]]-1)*100:null;
+  const sm=avg(A.filter(o=>o.sec===s.sec).map(o=>o.q.dp||0)),nn=s.news?s.news.length:null,tone=s.news?s.news.reduce((a,n)=>a+(NEG.test(n.h)?-1:POS.test(n.h)?1:0),0):null;
+  s.nn=nn;s.tone=tone;
+  s.F=[['Variazione giornaliera',20,cl(((q.dp||0)+3)/6)],['Forza nel range',15,rg],['Andamento da apertura',10,op==null?null:cl((op+2)/4)],['Trend multi-giorno',15,tr==null?null:cl((tr+6)/12)],['Volatilità del giorno',10,rp==null?null:cl(1-Math.abs(rp-3)/5)],['Attenzione notizie',10,nn==null?null:cl(nn/8)],['Tono notizie',10,tone==null?null:cl((tone+3)/6)],['Settore',5,cl((sm+2)/4)],['Mercato',5,cl((mk+1.5)/3)]];
+  const av=s.F.filter(f=>f[2]!=null);s.cov=av.reduce((a,f)=>a+f[1],0);s.pen=(rp>8?10:0)+(Math.abs(q.dp||0)>10?10:0);
+  s.sc=Math.max(0,Math.min(100,Math.round(av.reduce((a,f)=>a+f[1]*f[2],0)/s.cov*100-s.pen)))});
+ const had=Object.keys(PREV).length>0,nx={};
+ S.forEach(s=>{s.rk=0});
+ A.sort((a,b)=>b.sc-a.sc).forEach((s,i)=>{s.rk=i+1;s.pr=PREV[s.t]??null;s.nw=had&&s.rk<=30&&(s.pr==null||s.pr>30);nx[s.t]=s.rk});
+ S.forEach(s=>s.ex=had&&s.rk>30&&s.pr!=null&&s.pr<=30);PREV=nx;LS('rk',nx)}
+
+/* ---- stato dati ---- */
+function state(s){const age=Date.now()-s.q.t*1000,o=ny().open;
+ return o?(age>6e5?['OBSOLETO','']:['AGGIORNATO','l']):['MERCATO CHIUSO','w']}
+function status(){
+ const n=S.filter(s=>s.q).length,m=ny(),p=$('#st');
+ $('#mk').textContent='Mercato USA '+(m.open?'aperto':'chiuso')+' · New York '+m.hm;
+ p.className='pill '+(lastErr?'er':n?'ok':'wr');
+ p.textContent=lastErr||(n?'Finnhub: '+n+'/'+S.length+' titoli':'Non collegato');
+ $('#lu').textContent=LT?'dati del '+new Date(LT).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'nessun aggiornamento';$('#setup').style.display=cfg.key?'none':'block'}
+
+/* ---- rendering ---- */
+const val=(s,k)=>({rk:s.rk,t:s.t,sec:s.sec,p:s.q.c,chg:s.q.dp||0,sc:s.sc,mv:s.pr?s.pr-s.rk:0})[k];
+function why(s){const t=s.F.filter(f=>f[2]!=null).map(f=>[f[0],f[1]*f[2]]).sort((a,b)=>b[1]-a[1]).slice(0,2).map(f=>f[0]);return 'Spinta da '+t.join(' e ')+(s.pen?'; penalità di rischio':'')}
+function render(){
+ $('#idx').innerHTML=MX.filter(i=>i.q).map(i=>`<div class="ix"><small>${i.n} (ETF ${i.t})</small><span class="n">${f2(i.q.c)}</span> <span class="n ${i.q.dp>=0?'u':'d'}">${i.q.dp>=0?'+':''}${f2(i.q.dp||0)}%</span></div>`).join('');
+ const q=$('#q').value.toLowerCase(),fs=$('#fs').value,fw=$('#fw').checked;
+ let L=S.filter(s=>s.rk>0&&s.rk<=30&&(!q||(s.t+s.n).toLowerCase().includes(q))&&(!fs||s.sec===fs)&&(!fw||WL.includes(s.t)));
+ L.sort((a,b)=>{const x=val(a,sort.k),y=val(b,sort.k);return(typeof x==='string'?x.localeCompare(y):x-y)*sort.d});
+ const ex=S.filter(s=>s.ex).map(s=>s.t),nw=S.filter(s=>s.nw&&s.rk<=30).map(s=>s.t);
+ $('#ex').textContent=(nw.length?'Nuovi ingressi: '+nw.join(', ')+'. ':'')+(ex.length?'Usciti dalla top 30: '+ex.join(', ')+'.':'');
+ $('#tb').innerHTML=L.length?L.map(s=>{const m=s.q,mv=s.pr?s.pr-s.rk:0,st=state(s);
+  return`<tr class="r" data-t="${s.t}"><td class="n">${s.rk}</td><td><span class="star ${WL.includes(s.t)?'on':''}" data-w="${s.t}">★</span> <b>${s.t}</b><span class="tag ${st[1]}">${st[0]}</span>${s.nw?'<span class="tag l">NUOVO</span>':''}<br><span class="mu">${esc(s.n)}</span></td><td class="hm mu">${s.sec}</td><td class="n">${f2(m.c)} <span class="mu">USD</span></td><td class="n ${m.dp>=0?'u':'d'}">${m.dp>=0?'+':''}${f2(m.dp||0)}%</td><td class="n"><b>${s.sc}</b></td><td class="n ${mv>0?'u':mv<0?'d':'mu'}">${s.pr==null?'—':mv>0?'▲'+mv:mv<0?'▼'+-mv:'='}</td><td class="hm mu" style="white-space:normal;min-width:200px">${why(s)}</td></tr>`+(open===s.t?`<tr><td colspan="8" class="det">${detail(s)}</td></tr>`:'')}).join(''):`<tr><td colspan="8" class="mu">${cfg.key?'Nessun dato da mostrare per ora.':'Collega Finnhub per vedere il ranking.'}</td></tr>`;
+ if(open){const s=S.find(x=>x.t===open);if(s&&$('#cv'))draw(s)}}
+function detail(s){const m=s.q,age=Math.round((Date.now()-m.t*1000)/6e4),ageT=age<90?age+' min fa':age<2880?Math.round(age/60)+' ore fa':Math.round(age/1440)+' giorni fa';
+ return`<div class="g">
+ <div class="box"><h3>Punteggio ${s.sc}/100: contributi</h3>${s.F.map(f=>f[2]==null?`<div class="f"><span>${f[0]}</span><span class="mu">dato non disponibile</span></div>`:`<div class="f"><span>${f[0]}</span><i><b style="width:${f[2]*100}%"></b></i><span class="n">${Math.round(f[1]*f[2])}/${f[1]}</span></div>`).join('')}<div class="f"><span>Penalità rischio</span><span class="n">−${s.pen}</span></div><p class="note">Copertura dati: ${s.cov}%. ${s.cov<70?'Affidabilità ridotta: mancano fattori.':''}</p></div>
+ <div class="box"><h3>Dati del giorno</h3><div class="n">Apertura ${f2(m.o)}<br>Massimo ${f2(m.h)} · Minimo ${f2(m.l)}<br>Chiusura prec. ${f2(m.pc)}<br>Range ${f2(m.pc?(m.h-m.l)/m.pc*100:0)}%</div><p class="note">Ultimo dato Finnhub: ${ageT}.</p></div>
+ <div class="box"><h3>Scenari ipotetici</h3><div class="note" style="color:var(--t)">Rialzista: tenuta sopra ${f2(m.h)} (massimo del giorno).<br>Base: oscillazione tra ${f2(m.l)} e ${f2(m.h)}.<br>Ribassista: rottura sotto ${f2(m.l)}.<br>Ingresso ipotetico sopra ${f2(m.h)}; invalidazione sotto ${f2(m.l)} (${f2((m.h-m.l)/m.h*100)}% di distanza).</div><p class="note">Nessun obiettivo di prezzo: senza storico adeguato non è calcolabile. Sono ipotesi, non previsioni.</p></div>
+ <div class="box"><h3>Notizie (48 ore)</h3>${s.news==null?'<p class="note">Notizie non ancora caricate per questo titolo.</p>':s.news.length?s.news.slice(0,5).map(n=>`<div class="news"><a href="${esc(n.u)}" target="_blank" rel="noopener">${esc(n.h)}</a><div class="note">${esc(n.src)} · ${new Date(n.dt*1000).toLocaleString('it-IT')}</div></div>`).join('')+`<p class="note">${s.nn} notizie, tono stimato ${s.tone>0?'positivo':s.tone<0?'negativo':'neutro'} (euristica su parole chiave).</p>`:'<p class="note">Nessuna notizia nelle ultime 48 ore.</p>'}</div>
+ <div class="box" style="grid-column:1/-1"><h3>Prezzo</h3><div class="bar"><button data-m="snap" class="${mode=='snap'?'on':''}">Sessione</button><button data-m="day" class="${mode=='day'?'on':''}">Giorni</button><span id="rd" class="n mu"></span></div><canvas id="cv"></canvas><p class="note">Lo storico a candele è a pagamento su Finnhub: il grafico si costruisce con i prezzi raccolti mentre l'app è aperta (Sessione) e con l'ultimo prezzo di ogni giorno in cui l'hai usata (Giorni).</p></div></div>`}
+function draw(s){const cv=$('#cv'),d=mode==='snap'?s.snap.map(x=>x[1]):Object.keys(s.hist).sort().map(k=>s.hist[k]),w=cv.clientWidth,h=170,r=devicePixelRatio||1;
+ cv.width=w*r;cv.height=h*r;const x=cv.getContext('2d');x.scale(r,r);x.fillStyle='#7f8a9a';x.font='12px sans-serif';
+ if(d.length<2){x.fillText('Servono più aggiornamenti per disegnare il grafico.',8,h/2);return}
+ const lo=Math.min(...d),hi=Math.max(...d),X=i=>i/(d.length-1)*(w-8)+4,Y=v=>h-16-(v-lo)/(hi-lo||1)*(h-32);
+ x.strokeStyle='#4aa3ff';x.lineWidth=2;x.beginPath();d.forEach((v,i)=>i?x.lineTo(X(i),Y(v)):x.moveTo(X(i),Y(v)));x.stroke();
+ x.fillText(f2(hi),4,11);x.fillText(f2(lo),4,h-3);
+ cv.onpointermove=e=>{const i=Math.max(0,Math.min(d.length-1,Math.round((e.offsetX-4)/(w-8)*(d.length-1))));$('#rd').textContent='punto '+(i+1)+'/'+d.length+' · '+f2(d[i])}}
+
+/* ---- news di mercato ---- */
+async function loadNews(){const b=$('#nb');
+ if(!cfg.key){b.innerHTML='<p class="note">Collega Finnhub in Impostazioni per leggere le notizie. Non vengono mai mostrati articoli inventati.</p>';return}
+ b.innerHTML='<p class="note">Caricamento…</p>';
+ try{const a=await api('news?category='+$('#nc').value);
+  b.innerHTML=a.length?a.slice(0,25).map(n=>`<div class="news"><b>${esc(n.headline)}</b><div class="note">${esc(n.summary).slice(0,220)}</div><div class="note">${esc(n.source)} · ${new Date(n.datetime*1000).toLocaleString('it-IT')} · ${esc(n.category)}${n.related?' · '+esc(n.related):''}</div><a href="${esc(n.url)}" target="_blank" rel="noopener">Leggi l'articolo originale</a></div>`).join(''):'<p class="note">Nessuna notizia disponibile.</p>'
+ }catch(e){b.innerHTML='<p class="note" style="color:var(--dn)">'+(e.code==='key'?'Chiave non valida.':e.code==='lim'?'Limite di richieste raggiunto, riprova tra poco.':'Non riesco a caricare le notizie.')+'</p>'}}
+
+/* ---- eventi ---- */
+$$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classList.toggle('on',x===b));$$('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.s));});
+$('#tb').onclick=e=>{const st=e.target.closest('[data-w]'),mb=e.target.closest('[data-m]');
+ if(mb){mode=mb.dataset.m;render();return}
+ if(st){const t=st.dataset.w;WL=WL.includes(t)?WL.filter(x=>x!==t):[...WL,t];LS('wl',WL);render();return}
+ const r=e.target.closest('tr.r');if(r){open=open===r.dataset.t?null:r.dataset.t;render()}};
+$$('th[data-k]').forEach(h=>h.onclick=()=>{sort={k:h.dataset.k,d:sort.k===h.dataset.k?-sort.d:1};render()});
+['#q','#fs','#fw'].forEach(i=>$(i).addEventListener('input',render));
+$('#rf').onclick=refresh;$('#nl').onclick=loadNews;
+function loadSet(){$('#sk').value=cfg.key}
+$('#ss').onclick=()=>{cfg={key:$('#sk').value.trim()};LS('cfg',cfg);$('#sm').textContent='Impostazioni salvate in questo browser.';refresh()};
+$('#sw').onclick=()=>{WL=[];LS('wl',WL);render()};
+$('#sr').onclick=()=>{cfg=Object.assign({},DEF);LS('cfg',cfg);WL=[];LS('wl',WL);PREV={};LS('rk',{});LS('cache',null);LT=0;loadSet();$('#sm').textContent='Impostazioni ripristinate.';S.forEach(s=>{s.q=null;s.rk=0});status();render()};
+window.addEventListener('offline',()=>{lastErr='Offline: ultimi dati disponibili';status()});
+
+/* ---- avvio ---- */
+$('#fs').insertAdjacentHTML('beforeend',[...new Set(U.map(u=>u[2]))].sort().map(v=>`<option>${v}</option>`).join(''));
+const C=LS('cache');
+if(C&&C.q){LT=C.t||0;S.forEach(s=>{s.q=C.q[s.t]||null;const x=(C.n||{})[s.t];if(x){s.news=x.news;s.nts=x.nts}});MX.forEach(m=>{m.q=(C.mx||{})[m.t]||null});score()}
+loadSet();status();render();
+</script></body></html>
